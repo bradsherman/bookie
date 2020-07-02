@@ -1,26 +1,34 @@
 <template>
-  <div class="hello">
-    <div v-if="!register">
+  <div class="md-layout md-alignment-top-center">
+    <form class="md-layout-item md-size-50" @submit.prevent="tryRegister">
       <h1>Register</h1>
-      <div class="md-layout-item md-small-size-100">
-        <label>Email</label>
-        <input v-model="email" />
+      <div class="md-small-size-100">
+        <md-field>
+          <label for="email">Email</label>
+          <md-input name="email" id="email" v-model="email" />
+        </md-field>
       </div>
-      <div class="md-layout-item md-small-size-100">
-        <label>Name</label>
-        <input v-model="name" />
+      <div class="md-small-size-100">
+        <md-field>
+          <label for="password">Password</label>
+          <md-input name="password" type="password" id="password" v-model="password" />
+        </md-field>
       </div>
-      <div class="md-layout-item md-small-size-100">
-        <label>Unit Size</label>
-        <input v-model.number="unitSize" type="number" />
+      <div class="md-small-size-100">
+        <md-field>
+          <label for="name">Name</label>
+          <md-input name="name" id="name" v-model="name" />
+        </md-field>
       </div>
-      <div class="md-layout-item md-small-size-100">
-        <label>Password</label>
-        <input type="password" v-model="password" />
+      <div class="md-small-size-100">
+        <md-field>
+          <label for="unitSize">Unit Size</label>
+          <md-input name="unitSize" id="unitSize" v-model.number="unitSize" />
+        </md-field>
       </div>
-      <button v-on:click="tryRegister" class="md-primary">Register</button>
-    </div>
-    <div v-else>{{ register }}</div>
+      <md-button class="md-raised md-primary" type="submit">Register</md-button>
+      <div v-if="errorMessage != ''" class="errorMsg md-elevation-1">{{ errorMessage }}</div>
+    </form>
   </div>
 </template>
 
@@ -34,17 +42,14 @@ export default class Register extends Vue {
   register = null;
   email = "";
   name = "";
-  unitSize = 0;
+  unitSize = 0.0;
   password = "";
+  errorMessage = "";
 
   async tryRegister() {
-    console.log("Registering!");
-    console.log(this.email);
-    console.log(this.name);
-    console.log(this.unitSize);
-    console.log(this.password);
     // TODO better validation and error
-    if (this.email === "" && this.password === "") {
+    if (this.email === "" || this.password === "") {
+      this.errorMessage = "Please fill out all fields.";
       return;
     }
     try {
@@ -80,10 +85,33 @@ export default class Register extends Vue {
         },
         errorPolicy: "all"
       });
+      const { data, errors } = result;
       console.log(result);
+      if (data) {
+        const { token, user } = data.register;
+        localStorage.setItem("token", token);
+        this.$router.push({ name: "Home", params: { token, user } });
+      } else {
+        if (errors && errors.length > 0) {
+          this.errorMessage = errors[0].message.split(":")[1];
+        } else {
+          this.errorMessage = "Unknown error occurred.";
+        }
+      }
     } catch (e) {
-      console.log("ERROR", e);
+      console.log(e);
+      this.errorMessage = "Unknown error occurred.";
     }
   }
 }
 </script>
+
+<style scoped>
+.errorMsg {
+  margin-top: 20px;
+  background-color: indianred;
+  font-weight: bold;
+  vertical-align: "center";
+  color: #2c3e50;
+}
+</style>

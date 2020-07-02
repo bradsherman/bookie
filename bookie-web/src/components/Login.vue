@@ -1,18 +1,22 @@
 <template>
-  <div class="hello">
-    <div v-if="!login">
+  <div class="md-layout md-alignment-top-center">
+    <form class="login md-layout-item md-size-50" @submit.prevent="tryLogin">
       <h1>Login</h1>
-      <div class="md-layout-item md-small-size-100">
-        <label>Email</label>
-        <input v-model="email" />
+      <div class="md-small-size-100">
+        <md-field>
+          <label for="email">Email</label>
+          <md-input name="email" id="email" v-model="email" />
+        </md-field>
       </div>
-      <div class="md-layout-item md-small-size-100">
-        <label>Password</label>
-        <input type="password" v-model="password" />
+      <div class="md-small-size-100">
+        <md-field>
+          <label for="password">Password</label>
+          <md-input name="password" type="password" id="password" v-model="password" />
+        </md-field>
       </div>
-      <button v-on:click="tryLogin" class="md-primary">Login</button>
-    </div>
-    <div v-else>{{ login }}</div>
+      <md-button class="md-raised md-accent" type="submit">Login</md-button>
+      <div v-if="errorMessage != ''" class="errorMsg md-elevation-1">{{ errorMessage }}</div>
+    </form>
   </div>
 </template>
 
@@ -26,13 +30,12 @@ export default class Login extends Vue {
   login = null;
   email = "";
   password = "";
+  errorMessage = "";
 
   async tryLogin() {
-    console.log("Logging in!");
-    console.log(this.email);
-    console.log(this.password);
-    if (this.email !== "" && this.password !== "") {
-      console.log(this.login);
+    if (this.email === "" || this.password === "") {
+      this.errorMessage = "Please fill out the email and password fields.";
+      return;
     }
     try {
       const result = await this.$apollo.query({
@@ -55,34 +58,41 @@ export default class Login extends Vue {
         },
         errorPolicy: "all"
       });
-      console.log(result);
-      /* const { data, errors, loading } = result; */
-      /* console.log(result.errors); */
-      /* console.log(result); */
-      /* this.login = result.data.login; */
-      /*   const result = await this.$apollo.mutate({ */
-      /*     mutation: gql` */
-      /*       mutation($email: String!, $password: String!) { */
-      /*         login(email: $email, password: $password) { */
-      /*           token */
-      /*           user { */
-      /*             id */
-      /*             name */
-      /*             email */
-      /*             unitSize */
-      /*           } */
-      /*         } */
-      /*       } */
-      /*     `, */
-      /*     variables: { */
-      /*       email: this.email, */
-      /*       password: this.password */
-      /*     } */
-      /*   }); */
-      /*   console.log(result); */
+      const { data, errors } = result;
+      if (data) {
+        const { token, user } = data.login;
+        localStorage.setItem("token", token);
+        this.$router.push({ name: "Home", params: { token, user } });
+      } else {
+        if (errors && errors.length > 0) {
+          this.errorMessage = errors[0].message.split(":")[1];
+        } else {
+          this.errorMessage = "Unknown error occurred.";
+        }
+      }
     } catch (e) {
-      console.log("ERROR", e);
+      this.errorMessage = "Unknown error occurred.";
     }
   }
 }
 </script>
+
+<style scoped>
+.md-app {
+  max-height: 50vh;
+  border: 1px solid rgba(rgb(0, 0, 0), 0.12);
+  background: linear-gradient(-90deg, #6a79cf, #1627c0);
+  color: #ffffff;
+}
+.login {
+  padding-left: 20px;
+  width: "50%";
+}
+.errorMsg {
+  margin-top: 20px;
+  background-color: indianred;
+  font-weight: bold;
+  vertical-align: "center";
+  color: #2c3e50;
+}
+</style>

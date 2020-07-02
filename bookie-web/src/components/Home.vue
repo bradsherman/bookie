@@ -1,7 +1,9 @@
 <template>
   <div class="hello">
-    <p>hey</p>
-    <p>{{ hello }}</p>
+    <div v-if="myUserInfo">
+      <p>hey {{ myUserInfo.name }}!</p>
+      <p>Your unitSize is {{ myUserInfo.unitSize }}</p>
+    </div>
   </div>
 </template>
 
@@ -11,16 +13,21 @@ import gql from "graphql-tag";
 
 @Component({
   apollo: {
-    hello: {
+    myUserInfo: {
       query: gql`
         query {
-          hello
+          myUserInfo {
+            id
+            name
+            email
+            unitSize
+          }
         }
       `
     }
   }
 })
-export default class HelloWorld extends Vue {}
+export default class Home extends Vue {}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

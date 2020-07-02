@@ -4,30 +4,50 @@
 
 module Graphql where
 
-import Authentication.JWT
-import Authentication.Password
-import Config
-import Control.Monad.Base (MonadBase)
-import Control.Monad.Except (ExceptT, MonadError, throwError)
-import Control.Monad.Reader (MonadReader, ReaderT, asks)
-import Control.Monad.Trans (MonadIO, MonadTrans, liftIO)
-import Control.Monad.Trans.Control (MonadBaseControl)
-import qualified Data.ByteString.Lazy.Char8 as B
-import Data.Morpheus (interpreter)
-import Data.Morpheus.Document (importGQLDocument)
-import Data.Morpheus.Types
-import Data.Morpheus.Types.Internal.AST (OperationType)
-import Data.Pool (Pool, withResource)
-import Data.Profunctor.Product.Default (Default)
-import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Text.Lazy as LT
-import Data.Time.Clock (getCurrentTime)
-import Database.PostgreSQL.Simple (Connection)
-import GHC.Int (Int64)
-import Network.HTTP.Types (Status)
+import           Authentication.JWT
+import           Authentication.Password
+import           Config
+import           Control.Monad.Base             ( MonadBase )
+import           Control.Monad.Except           ( ExceptT
+                                                , MonadError
+                                                , throwError
+                                                )
+import           Control.Monad.Reader           ( MonadReader
+                                                , ReaderT
+                                                , asks
+                                                )
+import           Control.Monad.Trans            ( MonadIO
+                                                , MonadTrans
+                                                , liftIO
+                                                )
+import           Control.Monad.Trans.Control    ( MonadBaseControl )
+import qualified Data.Aeson                    as Aeson
+import           Data.Aeson                     ( ToJSON(..) )
+import qualified Data.ByteString.Lazy.Char8    as B
+import           Data.Morpheus                  ( interpreter )
+import           Data.Morpheus.Document         ( importGQLDocument )
+import           Data.Morpheus.Types
+import           Data.Morpheus.Types.Internal.AST
+                                                ( OperationType )
+import           Data.Pool                      ( Pool
+                                                , withResource
+                                                )
+import           Data.Profunctor.Product.Default
+                                                ( Default )
+import           Data.Text                      ( Text )
+import qualified Data.Text                     as T
+import qualified Data.Text.Lazy                as LT
+import           Data.Time.Clock                ( getCurrentTime )
+import           Database.PostgreSQL.Simple     ( Connection )
+import           Error
+import           GHC.Int                        ( Int64 )
+import           Network.HTTP.Types             ( Status )
 import qualified Opaleye
-import Opaleye (FromFields, Insert, Select, Update)
+import           Opaleye                        ( FromFields
+                                                , Insert
+                                                , Select
+                                                , Update
+                                                )
 
 --
 -------------------------------------------------------------------------------
@@ -38,12 +58,6 @@ data Env
         config :: Config,
         currentUserId :: Maybe Int
       }
-
-data Error
-  = Error
-      Int -- HTTP status code
-      B.ByteString -- Error body
-  deriving (Show, Ord, Eq)
 
 newtype Web a
   = Web
@@ -73,49 +87,42 @@ type Value (o :: OperationType) a = Resolver o () Web a
 type Object (o :: OperationType) a = Resolver o () Web (a (Resolver o () Web))
 
 -- | Resolve (Maybe object)
-type MaybeObject (o :: OperationType) a =
-  Resolver o () Web (Maybe (a (Resolver o () Web)))
+type MaybeObject (o :: OperationType) a
+  = Resolver o () Web (Maybe (a (Resolver o () Web)))
 
 -- | Resolve [object]
-type ArrayObject (o :: OperationType) a =
-  Resolver o () Web [a (Resolver o () Web)]
+type ArrayObject (o :: OperationType) a
+  = Resolver o () Web [a (Resolver o () Web)]
 
-type GraphQL o =
-  ( MonadIO (Resolver o () Web),
-    WithOperation o,
-    MonadTrans (Resolver o ())
-  )
+type GraphQL o
+  = (MonadIO (Resolver o () Web), WithOperation o, MonadTrans (Resolver o ()))
 
 -------------------------------------------------------------------------------
 
 -- |
-runSelect ::
-  GraphQL o =>
-  Default FromFields fields haskells =>
-  Select fields ->
-  Value o [haskells]
+runSelect
+  :: GraphQL o
+  => Default FromFields fields haskells
+  => Select fields
+  -> Value o [haskells]
 runSelect select = do
   db <- lift $ asks dbPool
-  liftIO
-    $ withResource db
-    $ \connection -> Opaleye.runSelect connection select
+  liftIO $ withResource db $ \connection -> Opaleye.runSelect connection select
 
 -------------------------------------------------------------------------------
-runSelectOne ::
-  GraphQL o =>
-  Default FromFields fields haskells =>
-  Select fields ->
-  String ->
-  Value o haskells
+runSelectOne
+  :: GraphQL o
+  => Default FromFields fields haskells
+  => Select fields
+  -> String
+  -> Value o haskells
 runSelectOne select errorMsg = do
   db <- lift $ asks dbPool
-  xs <-
-    liftIO
-      $ withResource db
-      $ \connection -> Opaleye.runSelect connection select
+  xs <- liftIO $ withResource db $ \connection ->
+    Opaleye.runSelect connection select
   case xs of
     [x] -> return x
-    _ -> failRes errorMsg
+    _   -> failRes errorMsg
 
 -------------------------------------------------------------------------------
 
@@ -123,17 +130,13 @@ runSelectOne select errorMsg = do
 runInsert :: GraphQL o => Insert haskells -> Value o haskells
 runInsert insert = do
   db <- lift $ asks dbPool
-  liftIO
-    $ withResource db
-    $ \connection -> Opaleye.runInsert_ connection insert
+  liftIO $ withResource db $ \connection -> Opaleye.runInsert_ connection insert
 
 -------------------------------------------------------------------------------
 runUpdate :: GraphQL o => Update haskells -> Value o haskells
 runUpdate update = do
   db <- lift $ asks dbPool
-  liftIO
-    $ withResource db
-    $ \connection -> Opaleye.runUpdate_ connection update
+  liftIO $ withResource db $ \connection -> Opaleye.runUpdate_ connection update
 
 -------------------------------------------------------------------------------
 requireAuthorized :: GraphQL o => Value o Int
@@ -141,4 +144,4 @@ requireAuthorized = do
   maybeID <- lift $ asks currentUserId
   case maybeID of
     Just id -> return id
-    _ -> lift $ throwError (Error 401 "Unauthorized")
+    _       -> lift $ throwError $ simpleError "Unauthorized"

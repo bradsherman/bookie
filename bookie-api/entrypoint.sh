@@ -22,6 +22,6 @@ trap 'kill ${!}; term_handler' SIGTERM
 # wait forever
 while true
 do
-  rg . -l | entr -r -d stack run
+  rg . -l | entr -c -d -r stack run
 done
 
