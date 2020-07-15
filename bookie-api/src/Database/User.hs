@@ -15,8 +15,8 @@ userSelect :: Select UserField
 userSelect = selectTable userTable
 
 -------------------------------------------------------------------------------
-insertUser :: (Text, Text, Text, Double) -> Insert Int64
-insertUser (userEmail, userPasswordHash, userName, unitSize) =
+insertUser :: (Text, Text, Text, Text, Double) -> Insert Int64
+insertUser (userEmail, userPasswordHash, userFirstName, userLastName, unitSize) =
   Insert
     { iTable = userTable,
       iRows =
@@ -25,7 +25,8 @@ insertUser (userEmail, userPasswordHash, userName, unitSize) =
               { userId = Nothing,
                 userEmail = toFields userEmail,
                 userPasswordHash = toFields userPasswordHash,
-                userName = toFields userName,
+                userFirstName = toFields userFirstName,
+                userLastName = toFields userLastName,
                 userUnitSize = toFields unitSize
               }
           ],

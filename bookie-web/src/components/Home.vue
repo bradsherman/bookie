@@ -1,7 +1,7 @@
 <template>
   <div class="hello">
     <div v-if="myUserInfo">
-      <p>hey {{ myUserInfo.name }}!</p>
+      <p>hey {{ myUserInfo.firstName }}!</p>
       <p>Your unitSize is {{ myUserInfo.unitSize }}</p>
     </div>
   </div>
@@ -18,7 +18,8 @@ import gql from "graphql-tag";
         query {
           myUserInfo {
             id
-            name
+            firstName
+            lastName
             email
             unitSize
           }

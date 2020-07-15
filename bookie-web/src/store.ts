@@ -6,7 +6,8 @@ Vue.use(Vuex);
 interface BookieUser {
   email: string;
   id: number;
-  name: string;
+  firstName: string;
+  lastName: string;
   unitSize: number;
 }
 

@@ -16,8 +16,12 @@
       </div>
       <div class="md-small-size-100">
         <md-field>
-          <label for="name">Name</label>
-          <md-input name="name" id="name" v-model="name" />
+          <label for="firstName">First Name</label>
+          <md-input name="firstName" id="firstName" v-model="firstName" />
+        </md-field>
+        <md-field>
+          <label for="lastName">Last Name</label>
+          <md-input name="lastName" id="lastName" v-model="lastName" />
         </md-field>
       </div>
       <div class="md-small-size-100">
@@ -41,7 +45,8 @@ export default class Register extends Vue {
   // TODO define type for this (eventually generate from graphql schema)
   register = null;
   email = "";
-  name = "";
+  firstName = "";
+  lastName = "";
   unitSize = 0.0;
   password = "";
   errorMessage = "";
@@ -58,19 +63,22 @@ export default class Register extends Vue {
           mutation(
             $email: String!
             $password: String!
-            $name: String!
+            $firstName: String!
+            $lastName: String!
             $unitSize: Float!
           ) {
             register(
               email: $email
               password: $password
-              name: $name
+              firstName: $firstName
+              lastName: $lastName
               unitSize: $unitSize
             ) {
               token
               user {
                 id
-                name
+                firstName
+                lastName
                 email
                 unitSize
               }
@@ -79,7 +87,8 @@ export default class Register extends Vue {
         `,
         variables: {
           email: this.email,
-          name: this.name,
+          firstName: this.firstName,
+          lastName: this.lastName,
           unitSize: this.unitSize,
           password: this.password
         },

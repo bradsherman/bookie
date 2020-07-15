@@ -1,7 +1,8 @@
 type User {
     id: Int!
     email: String!
-    name: String!
+    firstName: String!
+    lastName: String!
     unitSize: Float!
     updatedAt: String!
     createdAt: String!
@@ -19,6 +20,6 @@ type Query {
 }
 
 type Mutation {
-    register(email: String!, password: String!, name: String!, unitSize: Float!): Session!
+    register(email: String!, password: String!, firstName: String!, lastName: String!, unitSize: Float!): Session!
     changePassword(oldPassword: String!, newPassword: String!): Boolean!
 }

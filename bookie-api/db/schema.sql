@@ -44,9 +44,11 @@ CREATE TABLE public.users (
     id integer NOT NULL,
     email character varying NOT NULL,
     password_hash character varying NOT NULL,
-    name character varying NOT NULL,
+    first_name character varying NOT NULL,
+    unit_size real NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    last_name character varying NOT NULL
 );
 
 
@@ -125,4 +127,5 @@ CREATE TRIGGER users_updated_at BEFORE UPDATE ON public.users FOR EACH ROW EXECU
 
 INSERT INTO public.schema_migrations (version) VALUES
     ('20200104122356'),
-    ('20200112080004');
+    ('20200112080004'),
+    ('20200715032739');
