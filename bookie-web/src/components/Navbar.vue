@@ -29,16 +29,16 @@ couldn't get this to work without the links being blue/purple
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import IsAuthenticated from "@/IsAuthenticated";
+import Vue from "vue";
+import Component from "vue-class-component";
+
 @Component
 export default class Navbar extends Vue {
   get isAuthenticated() {
-    return IsAuthenticated();
+    return this.$store.getters.isAuthenticated;
   }
   logout() {
-    // TODO bring all token logic into one place
-    localStorage.removeItem("token");
+    this.$store.commit("logout");
     this.$router.push("/login");
   }
 }

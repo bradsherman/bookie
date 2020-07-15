@@ -61,7 +61,10 @@ export default class Login extends Vue {
       const { data, errors } = result;
       if (data) {
         const { token, user } = data.login;
-        localStorage.setItem("token", token);
+        this.$store.commit("login", {
+          token,
+          user
+        });
         this.$router.push({ name: "Home", params: { token, user } });
       } else {
         if (errors && errors.length > 0) {

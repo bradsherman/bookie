@@ -6,6 +6,7 @@ import "vue-material/dist/vue-material.min.css";
 import App from "./App.vue";
 import apolloClient from "./apolloClient";
 import router from "./router";
+import store from "./store";
 
 Vue.use(VueApollo);
 Vue.use(VueMaterial);
@@ -19,5 +20,6 @@ new Vue({
   el: "#app",
   apolloProvider,
   router,
+  store,
   render: h => h(App)
 });
