@@ -1,5 +1,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Graphql where
@@ -81,18 +83,10 @@ importGQLDocument "schema.graphql"
 -------------------------------------------------------------------------------
 
 -- | Resolve single value
-type Value (o :: OperationType) a = Resolver o () Web a
+type Value (o :: OperationType) (a :: k) = ResolverO o () Web a
 
--- | Resolve object (which includes other fields that need their own resolvers)
-type Object (o :: OperationType) a = Resolver o () Web (a (Resolver o () Web))
-
--- | Resolve (Maybe object)
-type MaybeObject (o :: OperationType) a
-  = Resolver o () Web (Maybe (a (Resolver o () Web)))
-
--- | Resolve [object]
-type ArrayObject (o :: OperationType) a
-  = Resolver o () Web [a (Resolver o () Web)]
+-- | Resolve (f value)
+type Composed (o :: OperationType) f (a :: k) = ComposedResolver o () Web f a
 
 type GraphQL o
   = (MonadIO (Resolver o () Web), WithOperation o, MonadTrans (Resolver o ()))
@@ -122,7 +116,7 @@ runSelectOne select errorMsg = do
     Opaleye.runSelect connection select
   case xs of
     [x] -> return x
-    _   -> failRes errorMsg
+    _   -> fail errorMsg
 
 -------------------------------------------------------------------------------
 

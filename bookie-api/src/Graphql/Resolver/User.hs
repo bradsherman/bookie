@@ -1,3 +1,5 @@
+{-# LANGUAGE RankNTypes #-}
+
 module Graphql.Resolver.User where
 
 import           Authentication.JWT
@@ -32,7 +34,7 @@ import           GHC.Float                      ( double2Float
 import           Graphql
 
 -------------------------------------------------------------------------------
-userResolver :: GraphQL o => DB.User -> Object o User
+userResolver :: GraphQL o => DB.User -> Value o User
 userResolver user =
   let DB.User { userId, userEmail, userFirstName, userLastName, userUnitSize }
         = record user
@@ -47,7 +49,7 @@ userResolver user =
                   }
 
 -------------------------------------------------------------------------------
-loginResolver :: GraphQL o => LoginArgs -> Object o Session
+loginResolver :: GraphQL o => LoginArgs -> Value o Session
 loginResolver LoginArgs { email, password } = do
   res :: [DB.User] <- runSelect $ findUserByEmail email
   case res of
@@ -57,15 +59,15 @@ loginResolver LoginArgs { email, password } = do
         secret <- lift $ asks (jwtSecret . config)
         let jwt = makeJWT time secret (DB.userId . record $ user)
         return Session { token = pure jwt, user = userResolver user }
-    _ -> failRes "Wrong email or password"
+    _ -> fail "Wrong email or password"
 
 -------------------------------------------------------------------------------
-registerResolver :: RegisterArgs -> Object MUTATION Session
+registerResolver :: RegisterArgs -> Value MUTATION Session
 registerResolver RegisterArgs { email, password, firstName, lastName, unitSize }
   = do
     res :: [DB.User] <- runSelect $ findUserByEmail email
     case res of
-      _ : _ -> failRes "This email is already taken"
+      _ : _ -> fail "This email is already taken"
       []    -> do
         ph <- liftIO $ hashPassword password
         runInsert
@@ -73,7 +75,7 @@ registerResolver RegisterArgs { email, password, firstName, lastName, unitSize }
         loginResolver LoginArgs { email, password }
 
 -------------------------------------------------------------------------------
-myUserInfoResolver :: Object QUERY User
+myUserInfoResolver :: Value QUERY User
 myUserInfoResolver = do
   myUserId <- requireAuthorized
   runSelectOne (findUserByID myUserId) "Invalid user" >>= userResolver
@@ -93,4 +95,4 @@ changePasswordResolver ChangePasswordArgs { oldPassword, newPassword } = do
       ph <- liftIO $ hashPassword newPassword
       runUpdate $ updateUserPassword myUserId ph
       return True
-    else failRes "Wrong old password"
+    else fail "Wrong old password"
