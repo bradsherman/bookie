@@ -8,6 +8,26 @@ type User {
     createdAt: String!
 }
 
+type WagerType {
+    id: Int!
+    name: String!
+}
+
+type WagerDetails {
+    odds: Float!
+    line: Float
+}
+
+type Wager {
+    id: Int!
+    wagerType: WagerType!
+    details: WagerDetails!
+    bettor: User!
+    offerer: User!
+    amount: Float!
+    description: String!
+}
+
 type Session {
     token: String!
     user: User!
@@ -16,10 +36,13 @@ type Session {
 type Query {
     login(email: String!, password: String!): Session!
     myUserInfo: User!
+    myWagers: [Wager!]!
+    getWager(wagerId: Int!): Wager!
     hello: String!
 }
 
 type Mutation {
     register(email: String!, password: String!, firstName: String!, lastName: String!, unitSize: Float!): Session!
     changePassword(oldPassword: String!, newPassword: String!): Boolean!
+    addWager(wagerType: Int!, wagerDetails: String!, bettorId: Int!, offererId: Int!, amount: Float!, description: String!): Boolean!
 }

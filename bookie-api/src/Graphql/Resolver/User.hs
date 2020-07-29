@@ -80,7 +80,6 @@ myUserInfoResolver = do
   myUserId <- requireAuthorized
   runSelectOne (findUserByID myUserId) "Invalid user" >>= userResolver
 
-
 helloResolver :: Value QUERY Text
 helloResolver = return "Hello World!"
 

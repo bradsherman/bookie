@@ -10,7 +10,7 @@ extra-source-files:
   - README.md
   - ChangeLog.md
 
-description:         Please see the README on GitHub at <https://github.com/bsherman/bookie-api>
+description:         Please see the README on GitHub at <https://github.com/bsherman/bookie>
 
 default-extensions:
   - OverloadedStrings
