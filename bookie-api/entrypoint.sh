@@ -22,6 +22,6 @@ trap 'kill ${!}; term_handler' SIGTERM
 # wait forever
 while true
 do
-  rg . -l | entr -c -d -r stack run
+  find . -name "*.hs" -not -path "./.stack-work/*" -not -path "./.stack/*" | entr -c -d -r stack run
 done
 

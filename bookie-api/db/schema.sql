@@ -73,10 +73,94 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: wager_type; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.wager_type (
+    id integer NOT NULL,
+    wager_type character varying NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: wager_type_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.wager_type_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: wager_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.wager_type_id_seq OWNED BY public.wager_type.id;
+
+
+--
+-- Name: wagers; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.wagers (
+    id integer NOT NULL,
+    wager_type_id integer,
+    wager_details jsonb,
+    bettor_id integer,
+    offerer_id integer,
+    amount real NOT NULL,
+    description character varying(140),
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT self_bet CHECK ((bettor_id <> offerer_id))
+);
+
+
+--
+-- Name: wagers_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.wagers_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: wagers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.wagers_id_seq OWNED BY public.wagers.id;
+
+
+--
 -- Name: users id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Name: wager_type id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.wager_type ALTER COLUMN id SET DEFAULT nextval('public.wager_type_id_seq'::regclass);
+
+
+--
+-- Name: wagers id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.wagers ALTER COLUMN id SET DEFAULT nextval('public.wagers_id_seq'::regclass);
 
 
 --
@@ -110,10 +194,55 @@ CREATE UNIQUE INDEX users_id ON public.users USING btree (id);
 
 
 --
+-- Name: wager_type_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX wager_type_id ON public.wager_type USING btree (id);
+
+
+--
+-- Name: wagers_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX wagers_id ON public.wagers USING btree (id);
+
+
+--
 -- Name: users users_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER users_updated_at BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
+
+
+--
+-- Name: wagers wagers_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER wagers_updated_at BEFORE UPDATE ON public.wagers FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
+
+
+--
+-- Name: wagers wagers_bettor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.wagers
+    ADD CONSTRAINT wagers_bettor_id_fkey FOREIGN KEY (bettor_id) REFERENCES public.users(id);
+
+
+--
+-- Name: wagers wagers_offerer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.wagers
+    ADD CONSTRAINT wagers_offerer_id_fkey FOREIGN KEY (offerer_id) REFERENCES public.users(id);
+
+
+--
+-- Name: wagers wagers_wager_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.wagers
+    ADD CONSTRAINT wagers_wager_type_id_fkey FOREIGN KEY (wager_type_id) REFERENCES public.wager_type(id);
 
 
 --
@@ -128,4 +257,6 @@ CREATE TRIGGER users_updated_at BEFORE UPDATE ON public.users FOR EACH ROW EXECU
 INSERT INTO public.schema_migrations (version) VALUES
     ('20200104122356'),
     ('20200112080004'),
-    ('20200715032739');
+    ('20200715032739'),
+    ('20200716014301'),
+    ('20200716014401');

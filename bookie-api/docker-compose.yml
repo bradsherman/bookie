@@ -31,6 +31,7 @@ services:
       - ./schema.graphql:/root/schema.graphql
       - ./package.yaml:/root/package.yaml
       - ./stack.yaml:/root/stack.yaml
+      - ./entrypoint.sh:/root/entrypoint.sh
     ports:
       - ${APPLICATION_PORT}:${APPLICATION_PORT}
 
