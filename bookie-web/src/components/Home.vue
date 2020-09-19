@@ -1,15 +1,20 @@
 <template>
-  <div class="hello">
-    <div v-if="myUserInfo">
-      <p>hey {{ myUserInfo.firstName }}!</p>
-      <p>Your id is {{ myUserInfo.id }} and unitSize is {{ myUserInfo.unitSize }}</p>
+  <div class="md-layout">
+    <div class="md-layout-item">
+      <div class="md-layout-item" v-if="showInsertWager">
+        <InsertWager v-bind:toggleInsertWager="toggleInsertWager" />
+      </div>
+      <MyWagers
+        v-bind:showInsertWager="showInsertWager"
+        v-bind:toggleInsertWager="toggleInsertWager"
+      />
     </div>
-    <InsertWager />
-    <MyWagers />
   </div>
 </template>
 
 <script lang="ts">
+// TODO: re-organize my wagers and insert, it's clunky
+// maybe use FAB with insert wager modal
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
 
@@ -17,27 +22,17 @@ import InsertWager from "./InsertWager.vue";
 import MyWagers from "./MyWagers.vue";
 
 @Component({
-  apollo: {
-    myUserInfo: {
-      query: gql`
-        query {
-          myUserInfo {
-            id
-            firstName
-            lastName
-            email
-            unitSize
-          }
-        }
-      `
-    }
-  },
   components: {
     InsertWager,
     MyWagers
   }
 })
-export default class Home extends Vue {}
+export default class Home extends Vue {
+  showInsertWager = false;
+  toggleInsertWager() {
+    this.showInsertWager = !this.showInsertWager;
+  }
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
