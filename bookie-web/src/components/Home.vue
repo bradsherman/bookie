@@ -2,14 +2,19 @@
   <div class="hello">
     <div v-if="myUserInfo">
       <p>hey {{ myUserInfo.firstName }}!</p>
-      <p>Your unitSize is {{ myUserInfo.unitSize }}</p>
+      <p>Your id is {{ myUserInfo.id }} and unitSize is {{ myUserInfo.unitSize }}</p>
     </div>
+    <InsertWager />
+    <MyWagers />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
+
+import InsertWager from "./InsertWager.vue";
+import MyWagers from "./MyWagers.vue";
 
 @Component({
   apollo: {
@@ -26,6 +31,10 @@ import gql from "graphql-tag";
         }
       `
     }
+  },
+  components: {
+    InsertWager,
+    MyWagers
   }
 })
 export default class Home extends Vue {}

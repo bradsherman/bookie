@@ -45,7 +45,8 @@ export default class Login extends Vue {
               token
               user {
                 id
-                name
+                firstName
+                lastName
                 email
                 unitSize
               }
@@ -68,12 +69,14 @@ export default class Login extends Vue {
         this.$router.push({ name: "Home", params: { token, user } });
       } else {
         if (errors && errors.length > 0) {
-          this.errorMessage = errors[0].message.split(":")[1];
+          this.errorMessage = errors[0].message;
         } else {
+          console.log(errors);
           this.errorMessage = "Unknown error occurred.";
         }
       }
     } catch (e) {
+      console.log(e);
       this.errorMessage = "Unknown error occurred.";
     }
   }
