@@ -2,38 +2,33 @@
   <div>
     <div>The wager type ids are 1 (Moneyline), 2 (O/U), and 3 (Spread).</div>
     <form novalidate class="md-layout md-alignment-top-center" @submit.prevent="validateWager">
-      <md-card class="md-layout-item md-size-50 md-small-size-100">
+      <md-card class="md-layout-item md-size-33">
         <md-card-header>
           <div class="md-title">Insert Wager</div>
         </md-card-header>
 
         <md-card-content>
           <div class="md-layout md-gutter">
-            <div class="md-layout-item md-small-size-100">
+            <div class="md-layout-item">
               <md-field>
                 <label for="wager-type">Wager Type Id</label>
-                <md-input
-                  name="wager-type"
-                  type="number"
-                  id="wager-type"
-                  v-model="form.wagerType"
-                  :disabled="sending"
-                />
-                <span class="md-error" v-if="!form.wagerType.required">Wager Type Id is required</span>
+                <md-select v-model="form.wagerType" name="wager-type" id="wager-type">
+                  <md-option value="1">Moneyline</md-option>
+                  <md-option value="2">Over Under</md-option>
+                  <md-option value="3">Spread</md-option>
+                </md-select>
               </md-field>
             </div>
             <div class="md-layout-item md-small-size-100">
               <md-field>
                 <label for="line">Line</label>
                 <md-input name="line" id="line" v-model="form.line" :disabled="sending" />
-                <span class="md-error" v-if="!form.line.required">Line is required</span>
               </md-field>
             </div>
             <div class="md-layout-item md-small-size-100">
               <md-field>
                 <label for="odds">Odds</label>
                 <md-input name="odds" id="odds" v-model="form.odds" :disabled="sending" />
-                <span class="md-error" v-if="!form.odds.required">Odds are required</span>
               </md-field>
             </div>
           </div>
@@ -48,7 +43,6 @@
                   v-model="form.bettorId"
                   :disabled="sending"
                 />
-                <span class="md-error" v-if="!form.bettorId.required">Bettor Id is required</span>
               </md-field>
             </div>
             <div class="md-layout-item md-small-size-100">
@@ -61,7 +55,6 @@
                   v-model="form.offererId"
                   :disabled="sending"
                 />
-                <span class="md-error" v-if="!form.offererId.required">Offerer Id is required</span>
               </md-field>
             </div>
             <div class="md-layout-item md-small-size-100">
@@ -74,7 +67,6 @@
                   v-model="form.amount"
                   :disabled="sending"
                 />
-                <span class="md-error" v-if="!form.amount.required">Odds are required</span>
               </md-field>
             </div>
           </div>
@@ -88,7 +80,6 @@
                   v-model="form.description"
                   :disabled="sending"
                 />
-                <span class="md-error" v-if="!form.description.required">Description is required</span>
               </md-field>
             </div>
           </div>
@@ -107,23 +98,30 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
-export default class InsertWager extends Vue {
+
+const InsertWagerProps = Vue.extend({
+  props: {
+    toggleInsertWager: Function
+  }
+});
+
+export default class InsertWager extends InsertWagerProps {
   sending = false;
   wagerSaved = false;
   errorMessage = "";
   form = {
-    wagerType: -1,
-    odds: 0,
-    line: 0,
+    wagerType: null,
+    odds: null,
+    line: null,
     bettorId: this.$store.state.user.id,
-    offererId: -1,
-    amount: 0.0,
-    description: ""
+    offererId: null,
+    amount: null,
+    description: null
   };
   async validateWager() {
     console.log(this.form);
     console.log(this.errorMessage);
-    if (this.form.wagerType == -1) {
+    if (this.form.wagerType === null) {
       console.log("hello");
       this.errorMessage = "Please fill out wagerType";
       return;
@@ -171,6 +169,7 @@ export default class InsertWager extends Vue {
     this.sending = false;
     if (data) {
       this.wagerSaved = true;
+      this.$props.toggleInsertWager();
       /* } else { */
       /*   this.errorMessage = err */
     }

@@ -3,6 +3,7 @@ import VueRouter, { RouteConfig } from "vue-router";
 import Home from "../components/Home.vue";
 import Login from "../components/Login.vue";
 import Register from "../components/Register.vue";
+import Profile from "../components/Profile.vue";
 
 import IsAuthenticated from "../IsAuthenticated";
 
@@ -42,6 +43,12 @@ const routes: Array<RouteConfig> = [
     name: "Register",
     component: Register,
     beforeEnter: checkNoAuth
+  },
+  {
+    path: "/profile",
+    name: "Profile",
+    component: Profile,
+    beforeEnter: checkAuth
   }
 ];
 

@@ -6,6 +6,7 @@
         <div class="md-layout-item">
           <div v-if="isAuthenticated">
             <md-button to="/">Home</md-button>
+            <md-button to="/profile">Profile</md-button>
             <md-button v-on:click="logout" style="color: #fff;">Logout</md-button>
           </div>
           <div v-else>
